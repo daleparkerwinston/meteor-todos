@@ -1,6 +1,6 @@
 import angular from "angular";
 import angularMeteor from "angular-meteor";
-import {Tasks} from "../../api/tasks.js";
+import {TasksCollection} from "../../api/tasks.js";
 import {Meteor} from 'meteor/meteor';
 import "./todoList.html";
 
@@ -8,11 +8,13 @@ class TodoListCtrl {
     constructor($scope) {
         $scope.viewModel(this);
 
+        this.subscribe('tasks');
+
         this.hideCompleted = false;
 
         this.helpers({
             tasks() {
-                const selector = {owner: Meteor.userId()};
+                const selector = {};
 
                 // If hide completed is checked, filter tasks
                 if (this.getReactively('hideCompleted')) {
@@ -21,14 +23,14 @@ class TodoListCtrl {
                     };
                 }
 
-                return Tasks.find(selector, {
+                return TasksCollection.find(selector, {
                     sort: {
                         createdAt: -1
                     }
                 });
             },
             incompleteCount() {
-                return Tasks.find({owner:Meteor.userId(),checked: {$ne: true}}).count();
+                return TasksCollection.find({checked: {$ne: true}}).count();
             },
             currentUser() {
                 return Meteor.user();
@@ -38,27 +40,23 @@ class TodoListCtrl {
 
     addTask(newTask) {
         // Insert a task into the collection
-        Tasks.insert({
-            text: newTask,
-            createdAt: new Date,
-            owner: Meteor.userId(),
-            username: Meteor.user().username
-        });
+        Meteor.call('tasks.insert', newTask);
 
         // Clear form
         this.newTask = "";
     }
 
     setChecked(task) {
-        Tasks.update(task._id, {
-            $set: {
-                checked: !task.checked
-            },
-        });
+        // Update checked column of task document in collection
+        Meteor.call('tasks.setChecked', task._id, !task.checked);
     }
 
     removeTask(task) {
-        Tasks.remove(task._id);
+        Meteor.call('tasks.remove', task._id);
+    }
+
+    setPrivate(task) {
+        Meteor.call('tasks.setPrivate', task._id, !task.private);
     }
 }
 
