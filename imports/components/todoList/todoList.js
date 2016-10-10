@@ -43,7 +43,7 @@ class TodoListCtrl {
         Meteor.call('tasks.insert', newTask);
 
         // Clear form
-        this.newTask = "";
+        this.newTask = "";``
     }
 
     setChecked(task) {

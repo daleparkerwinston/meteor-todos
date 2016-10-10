@@ -21,3 +21,4 @@ angular-templates
 accounts-password
 dotansimha:accounts-ui-angular
 practicalmeteor:mocha
+angular:angular-mocks
